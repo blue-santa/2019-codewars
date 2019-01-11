@@ -1,8 +1,10 @@
 // https://www.codewars.com/kata/5263c6999e0f40dee200059d/train/javascript
+//
+// I'm taking a break on this one. It's too far above current skill level.
+
+
 
 const getPINs = function(observed) {
-
-	const res = []
 
 	const par = {
 		'1': ['1', '2', '4'],
@@ -23,20 +25,65 @@ const getPINs = function(observed) {
 		return par[el]
 	})
 
-	observed.forEach((el) => count = count * el.length)
-
-	let res = new Array(count)
-
-	res = res.map((el) => return '')
-
-	observed.forEach((arr) => {
-
-		arr.forEach((str, index) => {
-			
-		})
-
+	observed.forEach((el, index) => {
+		console.log(`observed[${index}]: ${el}`)
 	})
 
+	observed.forEach((el) => count = count * el.length)
+
+	let res = new Array(count).map((el) => {
+		return ''
+	})
+
+	const buildRes = function(mainArr) {
+
+		let currPrefix = ''
+
+		const lengthOfEach = mainArr.map((el) => { return el.length })
+
+		let currPosEach = new Array(mainArr.length).fill(0)
+		const resetFollowing = function(arr, pos) {
+			arr = arr.map((el, index) => {
+				if (index > pos) {
+					return 0
+				}
+			})
+
+			return arr
+		}
+
+		for (let i = 0; i < count; i++) {
+			
+			lengthOfEach.forEach((currPos, index) => {
+				
+				tipArr = mainArr[index]
+				console.log(`index: ${index}, currPosEach: ${currPosEach}, currPosEach[index]: ${currPosEach[index]}`)
+				console.log(`lengthOfEach: ${lengthOfEach}`)
+				console.log(`tipArr: ${tipArr}, tipArr[${currPosEach[index]}]: ${tipArr[currPosEach[index]]}`)
+				if (currPosEach[index] < lengthOfEach[index]) {
+					currPrefix.concat(tipArr[currPosEach[index]])
+					currPosEach[index]++
+				} else if (currPosEach[index] === lengthOfEach[index] && typeof(currPosEach[index + 1]) === 'undefined') {
+					currPrefix.concat(tipArr[currPosEach[index]])
+					currPosEach[index - 1]++
+					currPosEach[index] = 0
+				} else if (currPosEach[index] === lengthOfEach[index] && typeof(currPosEach[index + 1]) != 'undefined' && typeof(currPosEach[index - 1]) != 'undefined') {
+					currPrefix.concat(tipArr[currPosEach[index]])
+					currPosEach[index - 1]++
+					currPosEach[index] = 0 
+					currPosEach = resetFollowing(currPosEach, index)
+				} else if (currPosEach[index] === lengthOfEach[index] && typeof(currPosEach[index - 1]) === 'undefined') {
+					currPrefix.concat(tipArr[currPosEach[index]])
+				}
+			})
+			console.log(`i: ${i}, currPrefix: ${currPrefix}`)
+			res[i] = currPrefix
+
+			currPrefix = ''
+		}
+	}
+
+	buildRes(observed)
 }
 
 getPINs('123')
