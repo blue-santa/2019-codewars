@@ -10,11 +10,13 @@ fi
 
 ## Remove any superfluous characters
 
-$1="${1//[!a-zA-Z0-9\. ]/}"
+initial=$( echo "$1" | tr -dc '[:space:][:alnum:]\\n\.' )
+
+initial="${initial//\\n\\n/\n}"
 
 ## Capture the initial balance
 
-initial_balance="${1%%\\n*}"
+initial_balance="${initial%%\\n*}"
 
 ## Print the initial balance
 
@@ -22,7 +24,7 @@ initial_balance="${1%%\\n*}"
 
 ## Set the temporary variable to hold the original value
 
-temp="${1#*\\n}"
+temp="${initial#*\\n}"
 
 ## Print the original value
 
@@ -67,22 +69,25 @@ done
 
 current_i=0
 
+total_cost=0
+
 running_balance=( $initial_balance )
 
     # printf "\n%-35s %-50s\n" "\$running_balance[$current_i]:" "${running_balance[$current_i]}"
 
 for i in "${cost_array[@]}"
 do
-    running_balance[${#running_balance[@]}]=$( echo "scale=2; $running_balance[$current_i] - $cost_array[$current_i]" | bc )
 
-        # printf "%-35s %-50s\n" "\$running_balance[$(( $current_i + 1 ))]:" "${running_balance[$(( $current_i + 1 ))]}"
-    
+    # printf "\n%s%s\n%s%s\n\n" "running balance: " "${running_balance[$current_i]}" "cost_array: " "${cost_array[$current_i]}"
+
+    running_balance[${#running_balance[@]}]=$(bc <<< "scale=2; ${running_balance[$current_i]} - ${cost_array[$current_i]}")
+    total_cost=$( bc <<< "scale=2; ${total_cost} + ${cost_array[$current_i]}" )
     (( ++current_i ))
 done
 
-    # printf "%s\n" ""
+average_cost=$(bc <<< "scale=2; ${total_cost} / ${#cost_array[@]}")
 
-result=''
+result="Original Balance: "
 
 current_i=0
 
@@ -97,4 +102,5 @@ do
     (( ++current_i ))
 done
 
+result+="\nTotal expense  ${total_cost}\nAverage expense  ${average_cost}"
 printf "%s\n" "$result"
